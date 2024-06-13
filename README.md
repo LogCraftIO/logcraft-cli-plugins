@@ -18,4 +18,4 @@ With LogCraft CLI, you can easily deploy your security detections into your SIEM
 
 ## Plugins
 
-- Splunk
+- [Splunk](./splunk)

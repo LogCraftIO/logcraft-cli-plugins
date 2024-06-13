@@ -6,7 +6,7 @@ This repository contains plugins for LogCraft CLI. Pull/merge requests are welco
 
 **Documentation**: <a href="https://docs.logcraft.io" target="_blank">https://docs.logcraft.io</a>
 
-**Source Code**: <a href="https://github.com/LogCraftIO/logcraft-cli" target="_blank">https://github.com/LogCraftIO/logcraft-cli</a>
+**LogCraft CLI**: <a href="https://github.com/LogCraftIO/logcraft-cli" target="_blank">https://github.com/LogCraftIO/logcraft-cli</a>
 
 ---
 

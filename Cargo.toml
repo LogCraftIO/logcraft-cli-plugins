@@ -1,0 +1,47 @@
+# Copyright (c) 2023 LogCraft, SAS.
+# SPDX-License-Identifier: MPL-2.0
+
+[package]
+name = "lgc-plugins"
+version     = { workspace = true }
+authors     = { workspace = true }
+description = { workspace = true }
+edition     = { workspace = true }
+license     = { workspace = true }
+
+[lib]
+path = ""
+
+[workspace.package]
+version = "0.1.0"
+authors = ["LogCraft <dev@logcraft.io>"]
+edition = "2021"
+license = "MPL-2.0"
+homepage = "https://www.logcraft.io"
+repository = "https://github.com/LogCraftIO/logcraft-cli-plugins"
+rust-version = "1.78"
+readme = "README.md"
+description = """
+LogCraft plugins
+"""
+categories = ["command-line-utilities", "config"]
+keywords = ["iac", "dac", "security", "detection", "siem", "edr", "xdr", "automation"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort" 
+strip = "debuginfo"
+
+[workspace]
+members = [
+    "splunk"
+]
+
+[workspace.dependencies]
+wit-bindgen-rt = "0.26"
+wasi-http-client = "0.2.1"
+serde = "1.0"
+serde_json = "1.0"
+url = "2.5"

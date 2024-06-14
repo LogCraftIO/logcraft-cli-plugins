@@ -1,0 +1,32 @@
+# Copyright (c) 2023 LogCraft, SAS.
+# SPDX-License-Identifier: MPL-2.0
+
+[package]
+name = "splunk"
+description = "LogCraft Cli Splunk plugin"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+categories.workspace = true
+keywords.workspace = true
+
+[dependencies]
+wit-bindgen-rt = { workspace = true, features = ["bitflags"] }
+wasi-http-client.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+url.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[package.metadata.component]
+package = "logcraft:splunk"
+
+[package.metadata.component.target.dependencies]
+"logcraft:host" = { path = "../wit" }

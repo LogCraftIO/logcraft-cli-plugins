@@ -20,7 +20,12 @@ cd splunk
 cargo component build --release
 ```
 
-The plugin will be released under: `../target/wasm32-wasi/release/splunk.wasm`
+The plugin will be released under: `../target/wasm32-wasi/release/splunk.wasm`. Add it to `lgc` using the `plugins install` command:
+
+```bash
+~$ cd your-work-dir
+~$ lgc plugins install /path/to/target/wasm32-wasi/release/splunk.wasm
+```
 
 Note that compiling the plugin requires `cargo-component` and `wasm32-wasi`:
 

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::HashMap, time::Duration};
 use url::Url;
-use wasi_http_client::{Client, Method, RequestBuilder};
+use waki::{Client, Method, RequestBuilder};
 
 const SETTINGS: &str = include_str!("../package/settings.k");
 const DETECTION_SCHEMA: &str = include_str!("../package/rule.k");
@@ -16,22 +16,68 @@ const DETECTION_SCHEMA: &str = include_str!("../package/rule.k");
 struct Splunk {
     pub endpoint: String,
     pub authorization: String,
+    pub authorization_scheme: String,
     pub timeout: Option<u64>,
 }
 
 impl Splunk {
-    fn client(&self, method: Method, path: &str) -> Result<RequestBuilder, String> {
-        let url = Url::parse(&format!("{}/services/saved/searches/", &self.endpoint))
-            .map_err(|e| e.to_string())?
-            .join(path)
-            .map_err(|e| e.to_string())?;
+    fn client(
+        &self,
+        method: Method,
+        path: &str,
+        app: Option<&str>,
+        user: Option<String>,
+    ) -> Result<RequestBuilder, String> {
+        let url = Url::parse(&format!(
+            "{}/servicesNS/{}/{}/saved/searches/",
+            &self.endpoint,
+            user.unwrap_or("nobody".to_string()),
+            app.unwrap_or("-")
+        ))
+        .map_err(|e| e.to_string())?
+        .join(path)
+        .map_err(|e| e.to_string())?;
 
         let client = Client::new()
             .request(method, url.as_str())
             .connect_timeout(Duration::from_secs(self.timeout.unwrap_or(60)))
-            .header("Authorization", self.authorization.as_str());
+            .header(
+                "Authorization",
+                format!(
+                    "{} {}",
+                    self.authorization_scheme.as_str(),
+                    self.authorization.as_str()
+                ),
+            );
 
         Ok(client)
+    }
+
+    fn check_target_app(&self, app: &str) -> Result<(), String> {
+        let url = Url::parse(&format!("{}/services/apps/local/{}", &self.endpoint, app))
+            .map_err(|e| e.to_string())?;
+
+        // return Err(url.to_string());
+        let client = Client::new()
+            .request(Method::Get, url.as_str())
+            .connect_timeout(Duration::from_secs(self.timeout.unwrap_or(60)))
+            .header(
+                "Authorization",
+                format!(
+                    "{} {}",
+                    self.authorization_scheme.as_str(),
+                    self.authorization.as_str()
+                ),
+            );
+
+        match client.send() {
+            Ok(response) => match response.status_code() {
+                200 => Ok(()),
+                404 => Err(format!("target app '{}' not found", app)),
+                status => Err(format!("unable to check target app: HTTP/{}", status)),
+            },
+            Err(e) => Err(e.to_string()),
+        }
     }
 
     fn parse_configuration(config: &str) -> Result<Self, String> {
@@ -40,9 +86,11 @@ impl Splunk {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct SavedSearch {
-    // pub app: String,
+    pub app: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<String>,
     pub savedsearch: HashMap<String, Value>,
 }
 
@@ -91,24 +139,29 @@ impl Guest for Splunk {
     /// Create SavedSearch
     fn create(config: String, name: String, params: String) -> Result<Option<String>, String> {
         // Parse saved search
-        let mut search: SavedSearch = serde_json::from_str(&params)
+        let mut search_params: SavedSearch = serde_json::from_str(&params)
             .map_err(|err| format!("unable to parse detection url: {}", err))?;
 
         // Prepare query
-        search
+        search_params
             .savedsearch
             .insert("name".to_string(), Value::String(name));
 
         // Prepare request
         let client = Splunk::parse_configuration(&config)?
-            .client(Method::Post, "")?
-            .form(&search.savedsearch)
-            .query(&[("output_mode", "json")]);
+            .client(
+                Method::Post,
+                "",
+                Some(&search_params.app),
+                search_params.user,
+            )?
+            .query(&[("output_mode", "json")])
+            .form(&search_params.savedsearch);
 
         match client.send() {
-            Ok(resp) => match resp.status() {
+            Ok(resp) => match resp.status_code() {
                 201 => match String::from_utf8(resp.body().unwrap()) {
-                    Ok(_) => Ok(Some(String::from("prespent"))),
+                    Ok(_) => Ok(Some(String::from("OK"))),
                     Err(e) => Err(e.to_string()),
                 },
                 400 => {
@@ -124,68 +177,90 @@ impl Guest for Splunk {
                 }
                 code => Err(format!("HTTP/{}", code)),
             },
-            Err(e) => Err(format!("unable to send request: {}", e)),
+            Err(e) => Err(e.to_string()),
         }
     }
 
     /// Get SavedSearch
     fn read(config: String, name: String, params: String) -> Result<Option<String>, String> {
+        let search_params = serde_json::from_str::<SavedSearch>(&params)
+            .map_err(|err| format!("unable to parse response: {}", err))?;
+
+        let mut filter = search_params
+            .savedsearch
+            .keys()
+            .map(|s| ("f", s.as_str()))
+            .collect::<Vec<_>>();
+        filter.push(("output_mode", "json"));
+
         // Prepare request
-        let client = Splunk::parse_configuration(&config)?
-            .client(Method::Get, &name)?
-            .query(&[("output_mode", "json")]);
+        let config = Splunk::parse_configuration(&config)?;
+        config.check_target_app(&search_params.app)?;
+        let client = config
+            .client(
+                Method::Get,
+                &name,
+                Some(&search_params.app),
+                search_params.user.clone(),
+            )?
+            .query(&filter);
 
         match client.send() {
-            Ok(resp) => match resp.status() {
+            Ok(resp) => match resp.status_code() {
                 200 => match String::from_utf8(resp.body().unwrap()) {
                     Ok(resp) => {
-                        let search_params = &serde_json::from_str::<SavedSearch>(&params)
-                            .map_err(|err| format!("unable to parse response: {}", err))?;
-
                         let resp = &serde_json::from_str::<SearchResponse>(&resp.to_string())
                             .map_err(|err| format!("unable to parse response: {}", err))?
                             .entry[0]
                             .content;
 
-                        // Check for changes
-                        for (key, value) in search_params.savedsearch.iter() {
-                            if let Some(resp_value) = resp.get(key) {
-                                if resp_value != value {
-                                    return Ok(Some(String::from("1")));
-                                }
-                            } else {
-                                return Ok(Some(String::from("1")));
-                            }
-                        }
+                        let filtered: HashMap<String, Value> = search_params
+                            .savedsearch
+                            .iter()
+                            .filter_map(|(k, _)| {
+                                resp.get_key_value(k).map(|(k, v)| (k.clone(), v.clone()))
+                            })
+                            .collect();
 
-                        Ok(Some(String::default()))
+                        let resp = serde_json::to_string(&SavedSearch {
+                            app: search_params.app.clone(),
+                            user: search_params.user.clone(),
+                            savedsearch: filtered,
+                        })
+                        .map_err(|err| format!("unable to parse response: {}", err))?;
+
+                        Ok(Some(resp))
                     }
                     Err(e) => Err(e.to_string()),
                 },
                 404 => Ok(None),
                 code => Err(format!("HTTP/{}", code)),
             },
-            Err(e) => Err(format!("unable to send request: {}", e)),
+            Err(e) => Err(e.to_string()),
         }
     }
 
     /// Update SavedSearch
     fn update(config: String, name: String, params: String) -> Result<Option<String>, String> {
         // Parse saved search
-        let search: SavedSearch = serde_json::from_str(&params)
+        let search_params: SavedSearch = serde_json::from_str(&params)
             .map_err(|err| format!("unable to parse detection url: {}", err))?;
 
         // Prepare request
         let client = Splunk::parse_configuration(&config)?
-            .client(Method::Post, &name)?
-            .header("Content-Type", "application/json")
-            .query(&search.savedsearch)
-            .query(&[("output_mode", "json")]);
+            .client(
+                Method::Post,
+                &name,
+                Some(&search_params.app),
+                search_params.user,
+            )?
+            .query(&[("output_mode", "json")])
+            .form(&search_params.savedsearch);
 
         match client.send() {
-            Ok(resp) => match resp.status() {
+            Ok(resp) => match resp.status_code() {
                 200 => match String::from_utf8(resp.body().unwrap()) {
-                    Ok(_) => Ok(Some(String::from("prespent"))),
+                    Ok(_) => Ok(Some(String::from("OK"))),
                     Err(e) => Err(e.to_string()),
                 },
                 400 => {
@@ -201,21 +276,32 @@ impl Guest for Splunk {
                 }
                 code => Err(format!("HTTP/{}", code)),
             },
-            Err(e) => Err(format!("unable to send request: {}", e)),
+            Err(e) => Err(e.to_string()),
         }
     }
 
     /// Delete SavedSearch
-    fn delete(config: String, name: String, _params: String) -> Result<Option<String>, String> {
+    fn delete(config: String, name: String, params: String) -> Result<Option<String>, String> {
+        // Parse saved search
+        let search_params: SavedSearch = serde_json::from_str(&params)
+            .map_err(|err| format!("unable to parse detection url: {}", err))?;
+
         // Prepare request
-        let client = Splunk::parse_configuration(&config)?
-            .client(Method::Delete, &name)?
+        let config = Splunk::parse_configuration(&config)?;
+        config.check_target_app(&search_params.app)?;
+        let client = config
+            .client(
+                Method::Delete,
+                &name,
+                Some(&search_params.app),
+                search_params.user,
+            )?
             .query(&[("output_mode", "json")]);
 
         match client.send() {
-            Ok(resp) => match resp.status() {
+            Ok(resp) => match resp.status_code() {
                 200 => match String::from_utf8(resp.body().unwrap()) {
-                    Ok(_) => Ok(Some(String::from("prespent"))),
+                    Ok(_) => Ok(Some(String::from("OK"))),
                     Err(e) => Err(e.to_string()),
                 },
                 404 => Ok(None),
@@ -232,22 +318,23 @@ impl Guest for Splunk {
                 }
                 code => Err(format!("HTTP/{}", code)),
             },
-            Err(e) => Err(format!("unable to send request: {}", e)),
+            Err(e) => Err(e.to_string()),
         }
     }
 
     /// Ping service
     fn ping(config: String) -> Result<bool, String> {
         // Prepare request
-        let client = Splunk::parse_configuration(&config)?.client(Method::Get, "?count=1")?;
+        let client =
+            Splunk::parse_configuration(&config)?.client(Method::Get, "?count=1", None, None)?;
 
         match client.send() {
-            Ok(resp) => match resp.status() {
+            Ok(resp) => match resp.status_code() {
                 200 => Ok(true),
                 401 => Err("Unauthorized".to_string()),
                 code => Err(format!("HTTP/{}", code)),
             },
-            Err(e) => Err(format!("unable to send request: {}", e)),
+            Err(e) => Err(e.to_string()),
         }
     }
 }

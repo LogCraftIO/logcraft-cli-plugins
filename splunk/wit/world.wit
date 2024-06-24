@@ -10,4 +10,3 @@ world splunk {
     /// Exports
     export logcraft:host/plugin;
   }
-  

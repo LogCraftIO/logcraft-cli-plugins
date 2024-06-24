@@ -16,11 +16,11 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-wit-bindgen-rt = { workspace = true, features = ["bitflags"] }
-wasi-http-client.workspace = true
+wit-bindgen-rt = { workspace = true , features = ["bitflags"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 url.workspace = true
+waki.workspace = true
 
 [lib]
 crate-type = ["cdylib"]

@@ -9,17 +9,27 @@ schema Configuration:
   Attributes
   ----------
   endpoint: str, required
-    Splunk endpoint
+    Splunk URL
+  authorization_scheme: str, required
+    Authorization scheme
   authorization: str, required
-    sensitive: Authorization header
+    Authorization
+  timeout: int, optional
+    Timeout in seconds
   """
   # Mandatory Parameters
 
   # Splunk URL
   endpoint: str = 'https://splunk_endpoint:8089'
-  # Authorization header
-  authorization: str = 'Bearer c29tZQo=.dG9rZW4K'
+  # Authorization scheme
+  authorization_scheme: AuthorizationScheme = "Bearer"
+  # Authorization
+  @info(sensitive="true")
+  authorization: str = "base64_encoded_token"
+  # Timeout
+  timeout?: int = 60
 
   check:
-    regex.match(authorization, "^(Bearer|Basic)\s+.+"), "Incorrect authorization, must be: 'Bearer|Basic  <authz_base64>'"
     regex.match(endpoint, "^https?://"), "Incorrect endpoint, must start with http:// or https://."
+
+type AuthorizationScheme = "Bearer" | "Basic"

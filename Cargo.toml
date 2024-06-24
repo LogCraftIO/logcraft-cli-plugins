@@ -41,7 +41,7 @@ members = [
 
 [workspace.dependencies]
 wit-bindgen-rt = "0.26"
-wasi-http-client = "0.2.1"
 serde = "1.0"
 serde_json = "1.0"
+waki = "0.3"
 url = "2.5"

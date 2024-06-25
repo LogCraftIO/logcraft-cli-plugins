@@ -80,7 +80,7 @@ jobs:
             release/${{ needs.plan.outputs.name }}.wasm
             release/${{ needs.plan.outputs.name }}.wasm.sha256
           body: |
-            ## Download lgc ${{ needs.plan.outputs.name }} - ${{ needs.plan.outputs.version }}
+            ## Download lgc plugin ${{ needs.plan.outputs.name }} - ${{ needs.plan.outputs.version }}
             |  File  | Checksum |
             |--------|----------|
             |[${{ needs.plan.outputs.name }}.wasm](https://github.com/LogCraftIO/logcraft-cli-plugins/releases/download/${{  github.ref_name }}/${{ needs.plan.outputs.name }}.wasm) | [checksum](https://github.com/LogCraftIO/logcraft-cli-plugins/releases/download/${{  github.ref_name }}/${{ needs.plan.outputs.name }}.wasm) |

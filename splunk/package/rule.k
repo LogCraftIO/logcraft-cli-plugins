@@ -16,8 +16,6 @@ schema SavedSearch:
   """Splunk Saved Search
   cron_schedule: str, optional
     Valid values: cron string.
-  disabled: str, optional
-    Human-readable description of this saved search. Defaults to empty string.
   disabled: bool, optional
     Indicates if the saved search is enabled. Defaults to false.
   dispatch_buckets: int, optional
@@ -50,6 +48,10 @@ schema SavedSearch:
     Defines the viewstate id associated with the UI view listed in 'displayview'.
   workload_pool: str, optional
     Specifies the new workload pool where the existing running search will be placed.
+  action: any, optional
+    Enable or disable an alert action.
+  dispatch: any, optional
+    Wildcard argument that accepts any dispatch related argument.
   """
   cron_schedule?: str
   description?: str
@@ -69,7 +71,5 @@ schema SavedSearch:
   search?: str
   vsid?: str
   workload_pool?: str
-  test?: bool | int | 't'
-  actions: any
-  acl: any
-  dispatch: any
+  action?: any
+  dispatch?: any

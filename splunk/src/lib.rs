@@ -1,8 +1,17 @@
 // Copyright (c) 2023 LogCraft, SAS.
 // SPDX-License-Identifier: MPL-2.0
 
-mod bindings;
-use crate::bindings::exports::logcraft::host::plugin::{Guest, Metadata};
+mod bindings {
+    wit_bindgen::generate!({
+        path: "../wit",
+        world: "logcraft:lgc/plugins"
+    });
+}
+
+use bindings::{
+    export,
+    exports::logcraft::lgc::plugin::{Guest, Metadata},
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::HashMap, time::Duration};
@@ -339,4 +348,4 @@ impl Guest for Splunk {
     }
 }
 
-bindings::export!(Splunk with_types_in bindings);
+export!(Splunk with_types_in bindings);

@@ -3,7 +3,7 @@
 
 [package]
 name = "splunk"
-description = "LogCraft Cli Splunk plugin"
+description = "LogCraft CLI Splunk plugin"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

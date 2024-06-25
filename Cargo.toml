@@ -40,7 +40,7 @@ members = [
 ]
 
 [workspace.dependencies]
-wit-bindgen-rt = "0.26"
+wit-bindgen = "0.26"
 serde = "1.0"
 serde_json = "1.0"
 waki = "0.3"

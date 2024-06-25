@@ -16,7 +16,7 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-wit-bindgen-rt = { workspace = true , features = ["bitflags"] }
+wit-bindgen.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 url.workspace = true
@@ -24,9 +24,3 @@ waki.workspace = true
 
 [lib]
 crate-type = ["cdylib"]
-
-[package.metadata.component]
-package = "logcraft:splunk"
-
-[package.metadata.component.target.dependencies]
-"logcraft:host" = { path = "../wit" }

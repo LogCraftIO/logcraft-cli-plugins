@@ -1,4 +1,8 @@
-__pycache__/
+# Ignore matching files
+poetry.lock
 *.wasm
-**/plugins/
-.venv/
+# Ignore any matching folders
+*\__pycache__
+*\plugins
+*\.venv
+*\.env

@@ -8,6 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 componentize-py = "^0.13.5"
+asyncio = "^3.4.3"
+mypy = "^1.10.1"
 
 [build-system]
 requires = ["poetry-core"]

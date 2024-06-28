@@ -10,13 +10,13 @@ boilerplate will be needed once those features arrive in Preview 3.
 import asyncio
 import socket
 import subprocess
-
-from myplugin.plugins.types import Ok, Err
-from myplugin.plugins.imports import types, streams, poll
-from myplugin.plugins.imports.types import IncomingBody, OutgoingBody, OutgoingRequest, IncomingResponse
-from myplugin.plugins.imports.streams import StreamErrorClosed, InputStream
-from myplugin.plugins.imports.poll import Pollable
 from typing import Optional, cast
+
+from plugins.types import Ok, Err
+from plugins.imports import types, streams, poll
+from plugins.imports.types import IncomingBody, OutgoingBody, OutgoingRequest, IncomingResponse
+from plugins.imports.streams import StreamErrorClosed, InputStream
+from plugins.imports.poll import Pollable
 
 # Maximum number of bytes to read at a time
 READ_SIZE: int = 16 * 1024

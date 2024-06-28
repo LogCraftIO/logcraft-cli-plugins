@@ -4,13 +4,15 @@ import asyncio
 import traceback
 import poll_loop
 from poll_loop import PollLoop, Sink, Stream
-from myplugin.plugins.types import Ok, Err
-from myplugin.plugins.imports.types import (
+
+from plugins.types import Ok, Err
+from plugins.imports.types import (
     IncomingResponse, Method, Method_Get, Method_Head, Method_Post, Method_Put, Method_Delete, Method_Connect, Method_Options,
     Method_Trace, Method_Patch, Method_Other, IncomingRequest, IncomingBody, ResponseOutparam, OutgoingResponse,
     Fields, Scheme, Scheme_Http, Scheme_Https, Scheme_Other, OutgoingRequest, OutgoingBody
 )
-from myplugin.plugins.imports.streams import StreamError_Closed
+from plugins.imports.streams import StreamError_Closed
+
 from dataclasses import dataclass
 from collections.abc import MutableMapping
 from typing import Optional

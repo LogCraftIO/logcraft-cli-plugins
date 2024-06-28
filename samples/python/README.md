@@ -17,16 +17,22 @@ Building a plugin is a 2 steps process:
 1. Build the bindings for your IDE. This is optional but advised for development.
 
 ```bash
-poetry run componentize-py --wit-path wit --world plugins bindings myplugin
-
+poetry run componentize-py --wit-path wit --world logcraft:lgc/plugins@0.1.0 bindings myplugin
 ```
 
 2. Build the plugin. This step automatically build the bindings regardless if you did it in the previous step or not. The resulting wasm file is the LogCraft CLI plugin.
 
 ```bash
-poetry run componentize-py --wit-path wit --world plugin componentize -p myplugin main -o my-plugin.wasm
+poetry run componentize-py --wit-path wit --world logcraft:lgc/plugins@0.1.0 componentize -p myplugin main -o my-plugin.wasm
 ```
 
+Or, with the provided Makefile:
+
+```bash
+% make bindings
+% make build
+% make clear
+```
 
 ## Important
 

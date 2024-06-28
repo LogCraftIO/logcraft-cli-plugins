@@ -11,11 +11,11 @@ import asyncio
 import socket
 import subprocess
 
-from plugins.types import Ok, Err
-from plugins.imports import types, streams, poll, outgoing_handler
-from plugins.imports.types import IncomingBody, OutgoingBody, OutgoingRequest, IncomingResponse
-from plugins.imports.streams import StreamErrorClosed, InputStream
-from plugins.imports.poll import Pollable
+from myplugin.plugins.types import Ok, Err
+from myplugin.plugins.imports import types, streams, poll
+from myplugin.plugins.imports.types import IncomingBody, OutgoingBody, OutgoingRequest, IncomingResponse
+from myplugin.plugins.imports.streams import StreamErrorClosed, InputStream
+from myplugin.plugins.imports.poll import Pollable
 from typing import Optional, cast
 
 # Maximum number of bytes to read at a time

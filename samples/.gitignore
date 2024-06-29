@@ -2,7 +2,7 @@
 poetry.lock
 *.wasm
 # Ignore any matching folders
-*\__pycache__
-*\plugins
-*\.venv
-*\.env
+__pycache__/
+plugins/
+.venv/
+.env/

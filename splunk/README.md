@@ -96,4 +96,4 @@ services:
     authorization: Basic YndheW5lOmJhdG1hbg==
 ```
 
-Similarely to tokens, make sure to add the keyword `Basic` before the base64 encoding.
+Similarly to tokens, make sure to add the keyword `Basic` before the base64 encoding.

@@ -1,1 +1,10 @@
+# Ignore matching files
+poetry.lock
 *.wasm
+# Ignore any matching folders
+__pycache__/
+.venv/
+.env/
+# ignore generated bindings
+plugins/
+schemas/

@@ -18,7 +18,7 @@ from schemas.rule import rule
 # A fix is planned for the future, so in the mean time, we use our own http library
 # derivated from sink
 # https://github.com/bytecodealliance/componentize-py/issues/96
-from client.req import Request, send
+from helpers.client.req import Request, send
 
 class Plugin(Plugin):
     # func() -> metadata;

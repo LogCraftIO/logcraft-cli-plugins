@@ -54,6 +54,11 @@ class Plugin(Plugin):
 
     # ping: func(config: string) -> result<bool, string>;
     def ping(self, config: str) -> int:
+        """
+        This is a sample implementation of the `ping` function that sends a GET request
+        to `https://google.fr` and returns the status code, or an error if the request
+        fails.
+        """
         try:
             resp = send(Request("GET", "https://google.fr", {}, None))
         except Exception as e:

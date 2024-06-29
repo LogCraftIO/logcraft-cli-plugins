@@ -11,6 +11,9 @@ componentize-py = "^0.13.5"
 asyncio = "^3.4.3"
 mypy = "^1.10.1"
 
+[tool.poetry.group.test.dependencies]
+ruff = "^0.5.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

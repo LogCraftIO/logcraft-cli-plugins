@@ -1,3 +1,6 @@
+# Copyright (c) 2023 LogCraft, SAS.
+# SPDX-License-Identifier: MPL-2.0
+
 [tool.poetry]
 name = "myplugin"
 version = "0.1.0"

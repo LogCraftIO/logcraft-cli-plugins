@@ -13,7 +13,11 @@ strictCheck = true
 
 excludes = [
     ".github/workflows/**",
-    "Cargo.*"
+    "Cargo.*",
+
+    # Samples folder
+    "samples/python/myplugin/client",
+    "pyproject.toml",
 ]
 
 [git]

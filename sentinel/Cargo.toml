@@ -1,0 +1,26 @@
+# Copyright (c) 2023 LogCraft, SAS.
+# SPDX-License-Identifier: MPL-2.0
+
+[package]
+name = "sentinel"
+description = "LogCraft CLI Sentinel plugin"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+categories.workspace = true
+keywords.workspace = true
+
+[dependencies]
+wit-bindgen.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+url.workspace = true
+waki = { workspace = true, features = ["json"] }
+
+[lib]
+crate-type = ["cdylib"]

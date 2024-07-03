@@ -11,6 +11,8 @@ from plugins.exports.plugin import Metadata
 from schemas.settings import settings
 from schemas.rule import rule
 
+import json
+
 # NOTE:
 # As of June 2024, the `requests` library is not supported due to missing dependencies
 # in the CPython runtime used by componentize-py (ssl support, zlib).
@@ -49,19 +51,89 @@ class Plugin(Plugin):
 
     # func(config: string, name: string, params: string) -> result<option<string>, string>;
     def create(self, config: str, name: str, params: str) -> Result[Optional[str], str]:
-        return Ok(Some("create()"))
+        try:
+            # Service configuration
+            config = json.loads(config)
+
+            # Rule parameters
+            params = json.loads(params)
+        except json.JSONDecodeError as e:   
+            raise Err(str(e))
+
+        resp = send(Request("GET", config["endpoint"], {}, None))
+
+        if resp.status == 201:
+            # Rule content not needed
+            return ""
+        raise Err(str(resp.status))
 
     # func(config: string, name: string, params: string) -> result<option<string>, string>;
     def read(self, config: str, name: str, params: str) -> Optional[str]:
-       return Ok(Some("read()"))
+        try:
+            # Service configuration
+            config = json.loads(config)
+
+            # Rule parameters
+            params = json.loads(params)
+        except json.JSONDecodeError as e:   
+            raise Err(str(e))
+        
+        # Make the url
+        # url = f"{config['endpoint']}/service/remote/path/{name}"
+
+        resp = send(Request("GET", config["endpoint"], {}, None))
+        
+        # we return a json/dict object as a string.
+        # This object returns the rule.k
+        # return json.dumps({"rule": "my-rule"})
+        
+        if resp.status == 301:
+            return str(resp.body)
+        # If 404, detection does not exist and will be created
+        elif resp.status == 404:
+            return None
+        # For any other HTTP code return an error
+        else:
+            raise Err(f"Error: HTTP/{resp.status}")
 
     # func(config: string, name: string, params: string) -> result<option<string>, string>;
     def update(self, config: str, name: str, params: str) -> Optional[str]:
-        return Ok(Some("update()"))
+        try:
+            # Service configuration
+            config = json.loads(config)
+
+            # Rule parameters
+            params = json.loads(params)
+        except json.JSONDecodeError as e:   
+            raise Err(str(e))
+
+        resp = send(Request("GET", config["endpoint"], {}, None))
+
+        if resp.status == 200:
+            # Rule content not needed
+            return ""
+        raise Err(str(resp.status))
 
     # func(config: string, name: string, params: string) -> result<option<string>, string>;
     def delete(self, config: str, name: str, params: str) -> Optional[str]:
-        return Ok(Some("delete()"))
+        try:
+            # Service configuration
+            config = json.loads(config)
+
+            # Rule parameters
+            params = json.loads(params)
+        except json.JSONDecodeError as e:   
+            raise Err(str(e))
+
+        resp = send(Request("GET", config["endpoint"], {}, None))
+
+        if resp.status == 201:
+            # Rule content not needed
+            return ""
+        elif resp.status == 404:
+            # Detection doesn't exists
+            return None
+        raise Err(str(resp.status))
 
     # ping: func(config: string) -> result<bool, string>;
     def ping(self, config: str) -> int:
@@ -73,10 +145,13 @@ class Plugin(Plugin):
         fails.
         """
         try:
-            resp = send(Request("GET", "https://google.fr", {}, None))
-        except Exception as e:
+            # Service configuration
+            config = json.loads(config)
+            # Make GET request with service provided endpoint
+            resp = send(Request("GET", config["endpoint"], {}, None))
+        except Exception as e:   
             raise Err(str(e))
-
+        
         if resp.status >= 400:
             raise Err(str(resp.status))
         return resp.status

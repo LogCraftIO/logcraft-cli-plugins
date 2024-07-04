@@ -111,7 +111,7 @@ class Plugin(Plugin):
         url = f"{config['endpoint']}/some/service/remote/path/{name}"
         resp = send(Request("GET", url, {}, None))
 
-        if resp.status == 301:
+        if resp.status == 200:
             # return a json/dict object as a string (representing the rule.k)
             # ex: return json.dumps({"rule": "my-rule"})
             return str(resp.body)

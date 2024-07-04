@@ -2,51 +2,22 @@
 
 The Splunk plugin allows integrating LogCraft CLI with Cisco Splunk.
 
+## Installation
 
-## Getting the bits
-
-### Releases
-
-This is the recommended approach for most users, directly [download the latest build](https://github.com/LogCraftIO/logcraft-cli-plugins/releases) of the plugin.
-
-### Building from the sources
-
-If you prefer, you can build the plugin from the sources:
-
-```bash
-git clone https://github.com/LogCraftIO/logcraft-cli-plugins
-cd logcraft-cli-plugins
-cd splunk
-cargo component build --release
-```
-
-The plugin will be released under: `../target/wasm32-wasi/release/splunk.wasm`. Add it to `lgc` using the `plugins install` command:
-
-```bash
-~$ cd your-work-dir
-~$ lgc plugins install /path/to/target/wasm32-wasi/release/splunk.wasm
-```
-
-Note that compiling the plugin requires `cargo-component` and `wasm32-wasi`:
-
-```bash
-cargo install cargo-component --locked
-rustup target add wasm32-wasi
-```
-
-## Installing the plugin
-Once instantiated as a service, default values will be set.
+For installation instructions, please refer to the [root README](../README.md).
 
 ## Configuration
 
-The plugin has 2 parameters:
+The plugin has the following parameters:
 
 - `endpoint`: defines the URL of the Splunk server to interact with
-- `authorization`: defines the authorization mechanism to use (Bearer or Basic)
+- `authorization_scheme`: defines the authorization mechanism to use: Bearer (recommanded) or Basic.
+- `authorization`: set the token to use, either a JWT Token (Bearer) or a Base64 encoded string `base64(user:password)` (Basic).
+- `timeout`: an optional timeout for the communications with Splunk, default to 60 seconds.
 
 ### Authorization
 
-#### User tokens
+#### JWT/User tokens (recommended)
 Authentication tokens are the recommended mechanism to authenticate to Splunk.
 Log in to Splunk with admin privileges, then go to **Settings > Tokens** and create a new token.
 
@@ -66,10 +37,9 @@ services:
   plugin: splunk
   settings:
     endpoint: https://192.168.64.22:8089
-    authorization: Bearer eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYW.....z4IaBtAHPFg
+    authorization_scheme: Bearer
+    authorization: eyJraWQiOiJzcGx1bmsuc2VjcmV0IiwiYW.....z4IaBtAHPFg
 ```
-
-**Make sure to include the keyword `Bearer` before the token as illustrated above.**
 
 #### Basic
 
@@ -93,7 +63,6 @@ services:
   plugin: splunk
   settings:
     endpoint: https://192.168.64.22:8089
-    authorization: Basic YndheW5lOmJhdG1hbg==
+    authorization_scheme: Basic
+    authorization: YndheW5lOmJhdG1hbg==
 ```
-
-Similarly to tokens, make sure to add the keyword `Basic` before the base64 encoding.
